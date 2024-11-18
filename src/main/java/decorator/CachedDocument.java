@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 
 public class CachedDocument extends DocumentDecorator {
@@ -16,12 +17,12 @@ public class CachedDocument extends DocumentDecorator {
     }
 
     private void initializeDatabase() {
-        try (Connection conn = DriverManager.getConnection(DB_URL);
-             Statement stmt = conn.createStatement()) {
+        try (Connection CONN = DriverManager.getConnection(DB_URL);
+             Statement STMT = CONN.createStatement()) {
             String sql =
 "CREATE TABLE IF NOT EXISTS cache (filePath TEXT PRIMARY KEY, content TEXT)";
-            stmt.execute(sql);
-        } catch (Exception e) {
+            STMT.execute(sql);
+        } catch (SQLException e) {
             throw new RuntimeException("Error initializing database", e);
         }
     }
@@ -42,14 +43,14 @@ public class CachedDocument extends DocumentDecorator {
 
     private String getCachedContent(String filePath) {
         String sql = "SELECT content FROM cache WHERE filePath = ?";
-        try (Connection conn = DriverManager.getConnection(DB_URL);
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setString(1, filePath);
-            ResultSet rs = pstmt.executeQuery();
+        try (Connection CONN = DriverManager.getConnection(DB_URL);
+             PreparedStatement PSTMT = CONN.prepareStatement(sql)) {
+            PSTMT.setString(1, filePath);
+            ResultSet rs = PSTMT.executeQuery();
             if (rs.next()) {
                 return rs.getString("content");
             }
-        } catch (Exception e) {
+        } catch (SQLException e) {
             throw new RuntimeException(
                 "Error retrieving cached content", e
                 );
@@ -60,12 +61,12 @@ public class CachedDocument extends DocumentDecorator {
     private void cacheContent(String filePath, String content) {
         String sql = 
         "INSERT OR REPLACE INTO cache (filePath, content) VALUES (?, ?)";
-        try (Connection conn = DriverManager.getConnection(DB_URL);
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setString(1, filePath);
-            pstmt.setString(2, content);
-            pstmt.executeUpdate();
-        } catch (Exception e) {
+        try (Connection CONN = DriverManager.getConnection(DB_URL);
+             PreparedStatement PSTMT = CONN.prepareStatement(sql)) {
+            PSTMT.setString(1, filePath);
+            PSTMT.setString(2, content);
+            PSTMT.executeUpdate();
+        } catch (SQLException e) {
             throw new RuntimeException("Error caching content", e);
         }
     }
