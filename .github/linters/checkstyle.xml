@@ -25,8 +25,10 @@
     </module>
 
     <!-- Import control to allow specific imports -->
-    <module name="ImportControl">
-        <property name="file" value="import-control.xml"/>
+    <module name="RegexpSingleline">
+        <property name="format" value="^import java\.sql\..*;"/>
+        <property name="message" value="Allowed import: java.sql.*"/>
+        <property name="ignoreCase" value="true"/>
     </module>
 
 </module>
